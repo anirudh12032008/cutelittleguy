@@ -83,7 +83,7 @@ def handle_cutemsg(ack, respond, command):
 
     except Exception as e:
         print("Error:", e)
-        respond("Oops! Something went wrong.")
+        respond(f"Oops! Something went wrong. {e}")
 
 if __name__ == "__main__":
     app_token = os.getenv("SLACK_APP_TOKEN")
