@@ -1,6 +1,7 @@
 import os, random, time, re
 from slack_bolt import App
 from dotenv import load_dotenv
+from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 load_dotenv()
 app = App(token=os.getenv("SLACK_BOT_TOKEN"), signing_secret=os.getenv("SLACK_SIGNING_SECRET"))
@@ -30,27 +31,42 @@ def handle_cutemsg(ack, respond, command):
         options = [s.strip() for s in m.group(1).split(",") if s.strip()]
 
         # Determine channel_id
+        # default fallback
+        target_text = parts[0]  # what user typed after /cutemsg
+        target_mention = target_text
         channel_id = None
 
-        # Check if user mention <@U12345>
-        user_match = re.match(r"<@([A-Z0-9]+)>", target)
+        # 1. Check if it’s already a proper mention
+        user_match = re.match(r"<@([A-Z0-9]+)>", target_text)
         if user_match:
             user_id = user_match.group(1)
             conv = app.client.conversations_open(users=user_id)
             channel_id = conv["channel"]["id"]
-
-        # Check if channel mention <#C12345|name>
-        elif re.match(r"<#(C[0-9A-Z]+)(?:\|[^>]+)?>", target):
-            channel_id = re.match(r"<#(C[0-9A-Z]+)(?:\|[^>]+)?>", target).group(1)
-
-        # Fallback: assume direct channel ID or name
+            target_mention = f"<@{user_id}>"
         else:
-            channel_id = target
+            # 2. Try to find user by display name or real name
+            users = app.client.users_list()
+            found = False
+            for u in users["members"]:
+                if u.get("profile", {}).get("display_name") == target_text.strip("@") or \
+                u.get("name") == target_text.strip("@"):
+                    user_id = u["id"]
+                    conv = app.client.conversations_open(users=user_id)
+                    channel_id = conv["channel"]["id"]
+                    target_mention = f"<@{user_id}>"
+                    found = True
+                    break
+            if not found:
+                # fallback: treat as literal string (won’t ping)
+                channel_id = target_text
+
+
 
         app.client.chat_postMessage(
-            channel=command["channel_id"],
-            text=f"{invoker} used the command on {target} with count {count} messages!!!  ( 3 seconds delay between messages )"
-        )
+    channel=command["channel_id"],
+    text=f"{invoker} used the command on {target_mention} with count {count} messages!!!  "
+)
+
 
 
         # Send messages in a loop
@@ -70,6 +86,9 @@ def handle_cutemsg(ack, respond, command):
         respond("Oops! Something went wrong.")
 
 if __name__ == "__main__":
-    print(f" Cutemsg bot running on port {os.environ.get('PORT', 3000)}")
-    app.start(port=int(os.environ.get("PORT", 3000)))
+    app_token = os.getenv("SLACK_APP_TOKEN")
+    handler = SocketModeHandler(app, app_token)
+    print("⚡ Cutemsg bot running in Socket Mode...")
+    handler.start()
+
 # nano ~/.config/systemd/user/cutelittle.service
