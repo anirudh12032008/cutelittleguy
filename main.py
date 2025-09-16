@@ -72,4 +72,4 @@ def handle_cutemsg(ack, respond, command):
 if __name__ == "__main__":
     print(f" Cutemsg bot running on port {os.environ.get('PORT', 3000)}")
     app.start(port=int(os.environ.get("PORT", 3000)))
-nano ~/.config/systemd/user/cutelittle.service
+# nano ~/.config/systemd/user/cutelittle.service
