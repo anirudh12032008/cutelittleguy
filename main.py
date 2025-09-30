@@ -6,6 +6,8 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 load_dotenv()
 app = App(token=os.getenv("SLACK_BOT_TOKEN"), signing_secret=os.getenv("SLACK_SIGNING_SECRET"))
 
+import datetime
+
 @app.command("/cutemsg")
 def handle_cutemsg(ack, respond, command):
     ack()  # must ack immediately
@@ -22,7 +24,6 @@ def handle_cutemsg(ack, respond, command):
         count = int(parts[1]) if parts[1].isdigit() else 1
         rest = " ".join(parts[2:])
 
-        # extract message options
         m = re.search(r"\[(.*?)\]", rest)
         if not m:
             respond("You dumb ass mf don't you understand Usage: `/cutemsg @user 3 [hi, hello, hey]`")
@@ -30,13 +31,10 @@ def handle_cutemsg(ack, respond, command):
 
         options = [s.strip() for s in m.group(1).split(",") if s.strip()]
 
-        # Determine channel_id
-        # default fallback
         target_text = parts[0]  # what user typed after /cutemsg
         target_mention = target_text
         channel_id = None
 
-        # 1. Check if it’s already a proper mention
         user_match = re.match(r"<@([A-Z0-9]+)>", target_text)
         if user_match:
             user_id = user_match.group(1)
@@ -44,7 +42,6 @@ def handle_cutemsg(ack, respond, command):
             channel_id = conv["channel"]["id"]
             target_mention = f"<@{user_id}>"
         else:
-            # 2. Try to find user by display name or real name
             users = app.client.users_list()
             found = False
             for u in users["members"]:
@@ -57,14 +54,13 @@ def handle_cutemsg(ack, respond, command):
                     found = True
                     break
             if not found:
-                # fallback: treat as literal string (won’t ping)
                 channel_id = target_text
 
-
+        logC = "#cutelittleguy"
 
         app.client.chat_postMessage(
     channel=command["channel_id"],
-    text=f"{invoker} used the command on {target_mention} with count {count} messages!!!  "
+    text=f"{invoker} used the command on {target_mention} with count {count} messages!!!  (new)"
 )
 
 
@@ -80,6 +76,15 @@ def handle_cutemsg(ack, respond, command):
             time.sleep(3)
 
         respond(f"Sent {count} messages to {target}")
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        app.client.chat_postMessage(logC, (f"Cutemsg snitch\n"
+        f"criminal: {invoker}\n"
+        f"victim: {target_mention}\n"
+        f"count: {count}\n"
+        f"time: {now}"))
+
+# stats stuff
+
 
     except Exception as e:
         print("Error:", e)
@@ -88,7 +93,7 @@ def handle_cutemsg(ack, respond, command):
 if __name__ == "__main__":
     app_token = os.getenv("SLACK_APP_TOKEN")
     handler = SocketModeHandler(app, app_token)
-    print("⚡ Cutemsg bot running in Socket Mode...")
+    print("Cutemsg bot running in Socket Mode...")
     handler.start()
 
 # nano ~/.config/systemd/user/cutelittle.service
