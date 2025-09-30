@@ -56,7 +56,7 @@ def handle_cutemsg(ack, respond, command):
             if not found:
                 channel_id = target_text
 
-        logC = "#cutelittleguy"
+        logC = "C09FMPJGL7N"
 
         app.client.chat_postMessage(
     channel=command["channel_id"],
@@ -77,7 +77,7 @@ def handle_cutemsg(ack, respond, command):
 
         respond(f"Sent {count} messages to {target}")
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        app.client.chat_postMessage(logC, (f"Cutemsg snitch\n"
+        app.client.chat_postMessage(channel=logC, text=(f"Cutemsg snitch\n"
         f"criminal: {invoker}\n"
         f"victim: {target_mention}\n"
         f"count: {count}\n"
