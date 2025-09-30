@@ -1,6 +1,9 @@
 # Cute little Guy
 A Slack bot that spams a user with cute messages.
 
+<img width="1049" height="359" alt="image (25)" src="https://github.com/user-attachments/assets/a9cf5ad2-e281-4f12-ab92-e5ff48d7583f" />
+
+
 ## Usage
  `/cutemsg @user count [msg1, msg2, ....]` 
 
