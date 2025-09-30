@@ -3,6 +3,9 @@ A Slack bot that spams a user with cute messages.
 
 <img width="1049" height="359" alt="image (25)" src="https://github.com/user-attachments/assets/a9cf5ad2-e281-4f12-ab92-e5ff48d7583f" />
 
+<img width="798" height="651" alt="cl5" src="https://github.com/user-attachments/assets/25748cc6-b301-4fa1-8a47-6c6dfad6f88f" />
+
+
 
 ## Usage
  `/cutemsg @user count [msg1, msg2, ....]` 
